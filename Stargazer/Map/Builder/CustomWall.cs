@@ -5,21 +5,23 @@ using UnityEngine;
 
 namespace Stargazer.Map.Builder
 {
-    public class CustomWall : CustomBuilder
+    public class CustomWall : CustomEdge
     {
-        private Vector2[] Edges;
-
-        public CustomWall(params Vector2[] edges)
-        {
-            Edges = edges;
-        }
-
-        public void PreBuild(ShipStatus shipStatus, Transform parent)
+        public CustomWall(string name, params Vector2[] edges) : base(name, edges)
         {
 
         }
 
-        public void PostBuild(ShipStatus shipStatus, Transform parent)
+        public bool AddChild(CustomBuilder builder) => false;
+
+        public override void PreBuild(Blueprint blueprint, ShipStatus shipStatus, Transform parent)
+        {
+            base.PreBuild(blueprint, shipStatus, parent);
+
+            GameObject.layer = LayerMask.NameToLayer("Ship");
+        }
+
+        public override void PostBuild(Blueprint blueprint, ShipStatus shipStatus, Transform parent)
         {
 
         }

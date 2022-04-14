@@ -29,4 +29,8 @@
   <ItemGroup>
     <PackageReference Include="Unity3D.SDK" Version="2021.1.14.1" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Map\Task\" />
+  </ItemGroup>
 </Project>

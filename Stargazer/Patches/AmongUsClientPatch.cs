@@ -12,6 +12,7 @@ namespace Stargazer.Patches
         [HarmonyPrefix]
         public static void Postfix(AmongUsClient __instance)
         {
+            Assets.MapAssets.LoadAssets(__instance);
             Map.AdditionalMapManager.AddPrefabs(__instance);
         }
     }

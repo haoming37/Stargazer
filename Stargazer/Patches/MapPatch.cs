@@ -8,18 +8,31 @@ namespace Stargazer.Patches
 {
     public static class MapPatch
     {
+        public static void SetupCustomMap(Map.Blueprint blueprint,ShipStatus __instance)
+        {
+            if (blueprint.RequirePlainMap)
+            {
+                Map.MapReformer.Dismantle(__instance);
+                Map.MapReformer.CreateStandardMap(__instance);
+                Map.MapReformer.CreateDefaultSystemTypes(__instance);
+            }
+
+            blueprint.PreBuild(blueprint, __instance, __instance.transform);
+            blueprint.PostBuild(blueprint, __instance, __instance.transform);
+
+            __instance.AssignTaskIndexes();
+        }
+
         public static bool Prefix(ShipStatus __instance)
         {
             if (!Helpers.PlayingModMap()) return true;
 
-            Map.MapReformer.Dismantle(__instance);
-            Map.MapReformer.CreateStandardMap(__instance);
-            Map.MapReformer.CreateDefaultSystemTypes(__instance);
+            var blueprint = Map.AdditionalMapManager.GetBlueprint(PlayerControl.GameOptions.MapId);
+            if (blueprint == null) return true;
+            if (!blueprint.RequirePlainMap) return true;
 
-            __instance.AssignTaskIndexes();
-
+            SetupCustomMap(blueprint,__instance);
             ShipStatus.Instance = __instance;
-
 
             return false;
         }
@@ -28,6 +41,11 @@ namespace Stargazer.Patches
         {
             if (!Helpers.PlayingModMap()) return;
 
+            var blueprint = Map.AdditionalMapManager.GetBlueprint(PlayerControl.GameOptions.MapId);
+            if (blueprint == null) return;
+            if (blueprint.RequirePlainMap) return;
+
+            SetupCustomMap(blueprint, __instance);
         }
     }
 

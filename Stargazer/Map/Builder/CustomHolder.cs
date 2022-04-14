@@ -7,20 +7,42 @@ namespace Stargazer.Map.Builder
 {
     public class CustomHolder:CustomBuilder
     {
-        private string Name;
-        private GameObject gameObject;
-        private Transform transform;
-
         private HashSet<CustomBuilder> builders;
 
-        public void PreBuild(ShipStatus shipStatus,Transform parent)
+        public CustomHolder(string name,Vector2 pos) : base(name, pos)
         {
-            foreach
+            builders = new HashSet<CustomBuilder>();
         }
 
-        public void PostBuild(ShipStatus shipStatus, Transform parent)
+        protected void PreBuildChildren(Blueprint blueprint, ShipStatus shipStatus)
         {
+            foreach(var builder in builders) { builder.PreBuild(blueprint,shipStatus, GameObject.transform); }
+        }
 
+        protected void PostBuildChildren(Blueprint blueprint, ShipStatus shipStatus)
+        {
+            foreach (var builder in builders) { builder.PostBuild(blueprint,shipStatus, GameObject.transform); }
+        }
+
+        public override bool AddChild(CustomBuilder builder)
+        {
+            builders.Add(builder);
+            return true;
+        }
+
+        public override void PreBuild(Blueprint blueprint, ShipStatus shipStatus,Transform parent)
+        {
+            GameObject = new GameObject(Name);
+            GameObject.transform.SetParent(parent);
+            GameObject.transform.localPosition = Position;
+            GameObject.SetActive(true);
+
+            PreBuildChildren(blueprint, shipStatus);
+        }
+
+        public override void PostBuild(Blueprint blueprint, ShipStatus shipStatus, Transform parent)
+        {
+            PostBuildChildren(blueprint,shipStatus);
         }
     }
 }
