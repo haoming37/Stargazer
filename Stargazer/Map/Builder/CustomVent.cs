@@ -26,6 +26,8 @@ namespace Stargazer.Map.Builder
             Vent.Left = null;
             Vent.Center = null;
             Vent.Right = null;
+            Vent.name = Name;
+            Vent.Id = shipStatus.AllVents.Count + 1;
 
             GameObject = Vent.gameObject;
             GameObject.name = Name;

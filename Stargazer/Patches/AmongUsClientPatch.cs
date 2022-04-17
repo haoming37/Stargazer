@@ -12,7 +12,14 @@ namespace Stargazer.Patches
         [HarmonyPrefix]
         public static void Postfix(AmongUsClient __instance)
         {
+            Module.CustomSystemTypes.LoadVanillaSystemTypes();
+            Module.CustomTaskTypes.LoadVanillaTaskTypes();
+
             Assets.MapAssets.LoadAssets(__instance);
+            Map.Builder.Task.TaskBuilder.LoadVanillaTaskBuilders();
+
+            /* ここに追加マップ読み込み部を入れる */
+
             Map.AdditionalMapManager.AddPrefabs(__instance);
         }
     }

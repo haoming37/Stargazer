@@ -18,7 +18,25 @@ namespace Stargazer.Map
         public Dictionary<string, Builder.CustomConsole> Consoles;
         public Dictionary<string, Builder.CustomVent> Vents;
 
+        private HashSet<Database.TaskData> TaskDatabase { get; set; }
+
+        public void RegisterTask(Database.TaskData taskData)
+        {
+            TaskDatabase.Add(taskData);
+        }
+
         public Material MaskingShader { get; private set; }
+        public Material HighlightMaterial { get; private set; }
+
+        private Material GetMaterial(string name)
+        {
+            foreach (var mat in UnityEngine.Object.FindObjectsOfTypeIncludingAssets(Material.Il2CppType))
+            {
+                if (mat.name != name) continue;
+                return mat.Cast<Material>();
+            }
+            return Material.GetDefaultMaterial();
+        }
 
         public Blueprint(string name):base(name,Vector2.zero)
         {
@@ -28,6 +46,7 @@ namespace Stargazer.Map
             MinimapConfiguration = new MinimapConfiguration();
             Consoles = new Dictionary<string, Builder.CustomConsole>();
             Vents = new Dictionary<string, Builder.CustomVent>();
+            TaskDatabase = new HashSet<Database.TaskData>();
         }
 
         public override void PreBuild(Blueprint blueprint, ShipStatus shipStatus, Transform parent)
@@ -35,12 +54,9 @@ namespace Stargazer.Map
             //初期化
             Consoles.Clear();
             Vents.Clear();
-            foreach (var mat in UnityEngine.Object.FindObjectsOfTypeIncludingAssets(Material.Il2CppType)) {
-                if (mat.name != "MaskingShader") continue;
-                
-                MaskingShader = new Material(mat.Cast<Material>());
-                break;
-            }
+
+            MaskingShader = new Material(GetMaterial("MaskingShader"));
+            HighlightMaterial = GetMaterial("HighlightMat");
 
             //マップ周りの設定
             if (!(MinimapConfiguration.MapScale > 0f))
@@ -57,6 +73,32 @@ namespace Stargazer.Map
         public override void PostBuild(Blueprint blueprint, ShipStatus shipStatus, Transform parent)
         {
             PostBuildChildren(blueprint,shipStatus);
+
+            GameObject manager = new GameObject("TaskManager");
+            manager.transform.SetParent(shipStatus.transform);
+
+            foreach (var task in TaskDatabase)
+            {
+                if (!Builder.Task.TaskBuilder.TaskBuilders.ContainsKey(task.TaskType)) continue;
+
+                GameObject obj = new GameObject();
+                obj.transform.SetParent(manager.transform);
+
+                var result = Builder.Task.TaskBuilder.TaskBuilders[task.TaskType].BuildTask(shipStatus,obj, this, task);
+
+                switch (task.TaskCategory)
+                {
+                    case Database.TaskCategory.CommonTask:
+                        shipStatus.CommonTasks = Helpers.AddToReferenceArray(shipStatus.CommonTasks, result);
+                        break;
+                    case Database.TaskCategory.LongTask:
+                        shipStatus.LongTasks = Helpers.AddToReferenceArray(shipStatus.LongTasks, result);
+                        break;
+                    case Database.TaskCategory.ShortTask:
+                        shipStatus.NormalTasks = Helpers.AddToReferenceArray(shipStatus.NormalTasks, result);
+                        break;
+                }
+            }
         }
 
         public string GetAddressPrefix()
