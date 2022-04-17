@@ -24,6 +24,7 @@ namespace Stargazer.Map
             };
             Builder.CustomShipRoom room;
             Builder.CustomVent vent;
+            Builder.CustomConsole console;
 
             room = new Builder.CustomShipRoom("MainHall", SystemTypes.MainHall,StringNames.MainHall, new Vector2(-5, 23));
             room.SpriteAddress = "TestRoom.png";
@@ -34,6 +35,10 @@ namespace Stargazer.Map
             vent = new Builder.CustomVent("Vent1","CVent1",new Vector2(-1,1));
             vent.Left = "CVent2";
             room.AddChild(vent);
+            console = new Builder.CustomConsole("Wire1", "Wire1", new Vector2(-2, 2.4f), SystemTypes.MainHall);
+            console.SpriteAddress = "WireConsole.png";
+            console.TaskConsoleId = 5;
+            room.AddChild(console);
             b.AddChild(room);
 
             room = new Builder.CustomShipRoom("Lounge", SystemTypes.Lounge, StringNames.Lounge, new Vector2(1.05f, 23));
@@ -45,7 +50,21 @@ namespace Stargazer.Map
             vent = new Builder.CustomVent("Vent2", "CVent2", new Vector2(1, -1));
             vent.Left = "CVent1";
             room.AddChild(vent);
+            console = new Builder.CustomConsole("Wire2", "Wire2", new Vector2(2, 2.4f), SystemTypes.Lounge);
+            console.SpriteAddress = "WireConsole.png";
+            console.TaskConsoleId = 6;
+            room.AddChild(console);
             b.AddChild(room);
+
+            var task = new Database.TaskData();
+            var tList = new List<string>();
+            tList.Add("Wire1");
+            tList.Add("Wire2");
+            task.ConsoleList.Add(tList);
+            task.MaxSteps = 2;
+            task.TaskCategory = Database.TaskCategory.CommonTask;
+            task.TaskType = TaskTypes.FixWiring;
+            b.RegisterTask(task);
 
             AdditionalMaps.Add(b);
             var list = Constants.MapNames.ToList();

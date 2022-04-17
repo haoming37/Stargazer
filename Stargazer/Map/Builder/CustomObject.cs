@@ -23,7 +23,7 @@ namespace Stargazer.Map.Builder
         {
             GameObject = new GameObject(Name);
             GameObject.transform.SetParent(parent);
-            GameObject.transform.localPosition = new Vector3(Position.x, Position.y, IsFront ? 4f : -10f);
+            GameObject.transform.localPosition = new Vector3(Position.x, Position.y, IsFront ? -2f : 4f);
             GameObject.SetActive(true);
             GameObject.layer = LayerMask.NameToLayer("Ship");
 
