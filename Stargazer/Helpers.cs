@@ -76,11 +76,6 @@ namespace Stargazer
             return iCall_LoadImage.Invoke(tex.Pointer, il2cppArray.Pointer, markNonReadable);
         }
 
-        public static JArray jsonListStringToJArray(string json)
-        {
-            JsonTextReader reader = new JsonTextReader(new Il2CppSystem.IO.StringReader(json));
-            return JArray.Load(reader, null);
-        }
         public static void log(string msg)
         {
             StargazerPlugin.Instance.Log.LogInfo(msg);
