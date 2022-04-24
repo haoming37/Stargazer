@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using UnhollowerBaseLib;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Stargazer
 {
@@ -29,6 +31,8 @@ namespace Stargazer
 
         public static Sprite loadSpriteFromDisk(string path, float pixelsPerUnit, Rect textureRect)
         {
+            StargazerPlugin.Instance.Log.LogInfo($"aaaaa");
+            StargazerPlugin.Instance.Log.LogInfo($"{path}");
             return Sprite.Create(loadTextureFromDisk(path), textureRect, new Vector2(0.5f, 0.5f), pixelsPerUnit);
         }
 
@@ -70,6 +74,16 @@ namespace Stargazer
                 iCall_LoadImage = IL2CPP.ResolveICall<d_LoadImage>("UnityEngine.ImageConversion::LoadImage");
             var il2cppArray = (Il2CppStructArray<byte>)data;
             return iCall_LoadImage.Invoke(tex.Pointer, il2cppArray.Pointer, markNonReadable);
+        }
+
+        public static JArray jsonListStringToJArray(string json)
+        {
+            JsonTextReader reader = new JsonTextReader(new Il2CppSystem.IO.StringReader(json));
+            return JArray.Load(reader, null);
+        }
+        public static void log(string msg)
+        {
+            StargazerPlugin.Instance.Log.LogInfo(msg);
         }
     }
 }
