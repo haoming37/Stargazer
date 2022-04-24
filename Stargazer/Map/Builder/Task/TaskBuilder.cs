@@ -11,40 +11,109 @@ namespace Stargazer.Map.Builder.Task
 
         public static void LoadVanillaTaskBuilders()
         {
+            TaskBuilders[TaskTypes.UploadData] = new UploadTaskBuilder();
+            
             TaskBuilder defaultBuilder = new TaskBuilder();
+            TaskBuilders[TaskTypes.PrimeShields] = defaultBuilder;
+            TaskBuilders[TaskTypes.FuelEngines] = defaultBuilder;
+            TaskBuilders[TaskTypes.ChartCourse] = defaultBuilder;
+            TaskBuilders[TaskTypes.StartReactor] = defaultBuilder;
+            TaskBuilders[TaskTypes.SwipeCard] = defaultBuilder;
+            TaskBuilders[TaskTypes.ClearAsteroids] = defaultBuilder;
+            TaskBuilders[TaskTypes.InspectSample] = defaultBuilder;
+            TaskBuilders[TaskTypes.EmptyChute] = defaultBuilder;
+            TaskBuilders[TaskTypes.EmptyGarbage] = defaultBuilder;
+            TaskBuilders[TaskTypes.AlignEngineOutput] = defaultBuilder;
             TaskBuilders[TaskTypes.FixWiring] = defaultBuilder;
+            TaskBuilders[TaskTypes.CalibrateDistributor] = defaultBuilder;
+            TaskBuilders[TaskTypes.UnlockManifolds] = defaultBuilder;
+            TaskBuilders[TaskTypes.ResetReactor] = defaultBuilder;
+            TaskBuilders[TaskTypes.FixLights] = defaultBuilder;
+            TaskBuilders[TaskTypes.CleanO2Filter] = defaultBuilder;
+            TaskBuilders[TaskTypes.FixComms] = defaultBuilder;
+            TaskBuilders[TaskTypes.RestoreOxy] = defaultBuilder;
+            TaskBuilders[TaskTypes.StabilizeSteering] = defaultBuilder;
+            TaskBuilders[TaskTypes.AssembleArtifact] = defaultBuilder;
+            TaskBuilders[TaskTypes.SortSamples] = defaultBuilder;
+            TaskBuilders[TaskTypes.MeasureWeather] = defaultBuilder;
+            TaskBuilders[TaskTypes.EnterIdCode] = defaultBuilder;
+            TaskBuilders[TaskTypes.BuyBeverage] = defaultBuilder;
+            TaskBuilders[TaskTypes.ProcessData] = defaultBuilder;
+            TaskBuilders[TaskTypes.RunDiagnostics] = defaultBuilder;
+            TaskBuilders[TaskTypes.WaterPlants] = defaultBuilder;
+            TaskBuilders[TaskTypes.MonitorOxygen] = defaultBuilder;
+            TaskBuilders[TaskTypes.StoreArtifacts] = defaultBuilder;
+            TaskBuilders[TaskTypes.FillCanisters] = defaultBuilder;
+            TaskBuilders[TaskTypes.InsertKeys] = defaultBuilder;
+            TaskBuilders[TaskTypes.ResetSeismic] = defaultBuilder;
+            TaskBuilders[TaskTypes.ScanBoardingPass] = defaultBuilder;
+            TaskBuilders[TaskTypes.ReplaceWaterJug] = defaultBuilder;
+            TaskBuilders[TaskTypes.RepairDrill] = defaultBuilder;
+            TaskBuilders[TaskTypes.AlignTelescope] = defaultBuilder;
+            TaskBuilders[TaskTypes.RecordTemperature] = defaultBuilder;
+            TaskBuilders[TaskTypes.RebootWifi] = defaultBuilder;
+            TaskBuilders[TaskTypes.PolishRuby] = defaultBuilder;
+            TaskBuilders[TaskTypes.ResetBreakers] = defaultBuilder;
+            TaskBuilders[TaskTypes.Decontaminate] = defaultBuilder;
+            TaskBuilders[TaskTypes.MakeBurger] = defaultBuilder;
+            TaskBuilders[TaskTypes.UnlockSafe] = defaultBuilder;
+            TaskBuilders[TaskTypes.SortRecords] = defaultBuilder;
+            TaskBuilders[TaskTypes.FixShower] = defaultBuilder;
+            TaskBuilders[TaskTypes.CleanToilet] = defaultBuilder;
+            TaskBuilders[TaskTypes.DressMannequin] = defaultBuilder;
+            TaskBuilders[TaskTypes.RewindTapes] = defaultBuilder;
+            TaskBuilders[TaskTypes.StartFans] = defaultBuilder;
+            TaskBuilders[TaskTypes.DevelopPhotos] = defaultBuilder;
+            TaskBuilders[TaskTypes.GetBiggolSword] = defaultBuilder;
+            TaskBuilders[TaskTypes.StopCharles] = defaultBuilder;
+            TaskBuilders[TaskTypes.VentCleaning] = defaultBuilder;
+
+            //特殊なComponentを要求するタスク
+            TaskBuilders[TaskTypes.PutAwayPistols] = new ExtendedTaskBuilder<StoreArmsTaskConsole, NormalPlayerTask>((console, data) => {
+                var orig = Assets.MapAssets.GetAsset(4).NormalTasks[18].Cast<StoreArmsTaskConsole>();
+                console.timesUsed = orig.timesUsed;
+                console.Images = orig.Images;
+                console.useSound = orig.useSound;
+                console.usesPerStep = orig.usesPerStep;
+            });
+            TaskBuilders[TaskTypes.PutAwayRifles] = new ExtendedTaskBuilder<StoreArmsTaskConsole, NormalPlayerTask>((console, data) => {
+                var orig = Assets.MapAssets.GetAsset(4).NormalTasks[19].Cast<StoreArmsTaskConsole>();
+                console.timesUsed = orig.timesUsed;
+                console.Images = orig.Images;
+                console.useSound = orig.useSound;
+                console.usesPerStep = orig.usesPerStep;
+            });
+            TaskBuilders[TaskTypes.DivertPower] = new DivertPowerTaskBuilder();
+            TaskBuilders[TaskTypes.PickUpTowels] = new ExtendedTaskBuilder<TowelTaskConsole, TowelTask>((console,data)=> { console.useSound=Assets.MapAssets.GetAsset(4).NormalTasks[14].Cast<TowelTaskConsole>().useSound; });
+            TaskBuilders[TaskTypes.OpenWaterways] = new ExtendedTaskBuilder<Console, WaterWayTask>();
+
+            //特殊な設定を必要とするComponentを要求するタスク
+            TaskBuilders[TaskTypes.ActivateWeatherNodes] = new ExtendedTaskBuilder<Console, WeatherNodeTask>(null, (task, data) => { task.Stage2Prefab = Assets.QuickAssets.GetMinigamePrefab(data.TaskType, 1); });
         }
 
-        protected void SetUpConsole(CustomConsole cc, ShipStatus shipStatus,Blueprint blueprint, Database.TaskData taskData)
+        protected virtual Console SetUpConsole(CustomConsole cc, Database.TaskData taskData,int step)
         {
-            Console console = cc.GameObject.GetComponent<Console>();
-
-            if (!console)
-            {
-                console = cc.GameObject.AddComponent<Console>();
-                console.checkWalls = true;
-                console.usableDistance = 0.9f;
-                console.TaskTypes = new TaskTypes[0];
-                console.ValidTasks = new UnhollowerBaseLib.Il2CppReferenceArray<TaskSet>(0);
-                console.Room = cc.RoomId;
-
-                shipStatus.AllConsoles = Helpers.AddToReferenceArray(shipStatus.AllConsoles, console);
-
-                console.Image = cc.GameObject.GetComponent<SpriteRenderer>();
-                console.Image.material = new Material(blueprint.HighlightMaterial);
-            }
-
-            if (!console.TaskTypes.Contains(taskData.TaskType))
-            {
-                var tasks = new List<TaskTypes>(console.TaskTypes);
-                tasks.Add(taskData.TaskType);
-                console.TaskTypes = tasks.ToArray();
-            }
-
-            console.ConsoleId = cc.TaskConsoleId;
+            Console console;
+            console = cc.GameObject.AddComponent<Console>();
+            InitializeConsole(console,cc,taskData,step);
+            return console;
         }
 
-        protected void SetUpButton(CustomConsole cc, Blueprint blueprint, Database.TaskData taskData)
+        protected void InitializeConsole(Console console, CustomConsole cc,Database.TaskData taskData,int step)
+        {
+            console.checkWalls = true;
+            console.usableDistance = 0.9f;
+            console.TaskTypes = new TaskTypes[] { taskData.TaskType };
+            TaskSet taskSet = new TaskSet();
+            taskSet.taskType = taskData.TaskType;
+            taskSet.taskStep = new IntRange(step,step);
+            console.ValidTasks = new UnhollowerBaseLib.Il2CppReferenceArray<TaskSet>(new TaskSet[] { taskSet });
+            console.Room = cc.RoomId;
+            console.ConsoleId = cc.TaskConsoleId;
+            console.TaskTypes = new TaskTypes[] { taskData.TaskType };
+        }
+
+        protected virtual void SetUpButton(CustomConsole cc, Blueprint blueprint, Database.TaskData taskData)
         {
             PassiveButton button = cc.GameObject.GetComponent<PassiveButton>();
 
@@ -58,7 +127,7 @@ namespace Stargazer.Map.Builder.Task
             }
         }
 
-        protected void SetUpCollider(CustomConsole cc, Blueprint blueprint, Database.TaskData taskData)
+        protected virtual void SetUpCollider(CustomConsole cc, Blueprint blueprint, Database.TaskData taskData)
         {
             CircleCollider2D collider = cc.GameObject.GetComponent<CircleCollider2D>();
 
@@ -70,47 +139,144 @@ namespace Stargazer.Map.Builder.Task
             }
         }
 
-        //タスクデータを基にタスクを生成します。
-        public virtual NormalPlayerTask BuildTask(ShipStatus shipStatus,GameObject taskHolder,Blueprint blueprint, Database.TaskData taskData)
+        protected virtual NormalPlayerTask SetUpPlayerTask(GameObject taskHolder, Database.TaskData taskData)
         {
-            foreach (var list in taskData.ConsoleList)
-            {
-                foreach (string id in list)
-                {
-                    if (!blueprint.Consoles.ContainsKey(id)) continue;
-                    var cc = blueprint.Consoles[id];
-
-                    SetUpConsole(cc, shipStatus,blueprint, taskData);
-                    SetUpButton(cc, blueprint, taskData);
-                    SetUpCollider(cc, blueprint, taskData);
-                }
-            }
-
             NormalPlayerTask task;
-            if (taskData.TaskType == TaskTypes.ActivateWeatherNodes)
-            {
-                task = taskHolder.AddComponent<WeatherNodeTask>();
-                WeatherNodeTask weatherNodeTask = task.Cast<WeatherNodeTask>();
-                weatherNodeTask.Stage2Prefab = Assets.QuickAssets.GetMinigamePrefab(taskData.TaskType,1);
-            }
-            else if (taskData.TaskType == TaskTypes.PickUpTowels)
-                task = taskHolder.AddComponent<TowelTask>();
-            else if (taskData.TaskType == TaskTypes.OpenWaterways)
-                task = taskHolder.AddComponent<WaterWayTask>();
-            else
-                task = taskHolder.AddComponent<NormalPlayerTask>();
+            task = taskHolder.AddComponent<NormalPlayerTask>();
 
+            InitializePlayerTask(task,taskData);
+
+            return task;
+        }
+
+        protected void InitializePlayerTask(NormalPlayerTask task,Database.TaskData taskData)
+        {
             task.MaxStep = taskData.MaxSteps;
-            task.ShowTaskStep = taskData.ShowTaskSteps;
+            task.ShowTaskStep = taskData.ShowTaskSteps && task.MaxStep > 1;
             task.ShowTaskTimer = taskData.ShowTaskTimer;
             task.TaskTimer = 0;
             task.TimerStarted = NormalPlayerTask.TimerState.NotStarted;
             task.TaskType = taskData.TaskType;
             task.HasLocation = true;
+            task.StartAt = taskData.StartAt;
             task.Length = Database.TaskData.ConvertLength(taskData.TaskCategory);
-            task.MinigamePrefab = Assets.QuickAssets.GetMinigamePrefab(taskData.TaskType);
+            task.MinigamePrefab = Assets.QuickAssets.GetMinigamePrefab(taskData.TaskType,taskData.TaskTypeArgument);
+        }
+
+        protected SystemTypes GetStartAtRoomByConsoles(List<string> consoles,Blueprint blueprint)
+        {
+            string id = consoles[StargazerPlugin.Random.Next(consoles.Count)];
+            if (!blueprint.Consoles.ContainsKey(id)) return SystemTypes.Hallway;
+            var cc = blueprint.Consoles[id];
+            return cc.RoomId;
+        }
+
+        protected void ScheduleSetStartAtRoomByConsoles(NormalPlayerTask task, List<string> consoles, ShipStatus shipStatus, Blueprint blueprint, Database.TaskData taskData)
+        {
+            var opt = task.gameObject.AddComponent<Behaviours.NormalPlayerTaskOption>();
+            int id = Behaviours.CustomShipStatus.Instance.TaskInitializerList.Count;
+            Behaviours.CustomShipStatus.Instance.TaskInitializerList.Add((task) =>
+            {
+                task.StartAt = GetStartAtRoomByConsoles(consoles, blueprint);
+            });
+            opt.InitializerId = id;
+        }
+
+        protected void SetUpConsolesByList(List<string> consoles, ShipStatus shipStatus, Blueprint blueprint, Database.TaskData taskData,int step,Action<Console>? afterAction=null)
+        {
+            foreach (string id in consoles)
+            {
+                if (!blueprint.Consoles.ContainsKey(id)) continue;
+                var cc = blueprint.Consoles[id];
+
+                var console = SetUpConsole(cc, taskData,step);
+                shipStatus.AllConsoles = Helpers.AddToReferenceArray(shipStatus.AllConsoles, console);
+                console.Image = cc.GameObject.GetComponent<SpriteRenderer>();
+                console.Image.material = new Material(blueprint.HighlightMaterial);
+
+                SetUpButton(cc, blueprint, taskData);
+                SetUpCollider(cc, blueprint, taskData);
+
+                if (afterAction != null) afterAction.Invoke(console);
+            }
+        }
+
+        //タスクデータを基にタスクを生成します。
+        public virtual NormalPlayerTask BuildTask(ShipStatus shipStatus,GameObject taskHolder,Blueprint blueprint, Database.TaskData taskData)
+        {
+            int step = 0;
+            foreach (var list in taskData.ConsoleList)
+            {
+                SetUpConsolesByList(list, shipStatus, blueprint, taskData, step);
+                step++;
+            }
+
+            return SetUpPlayerTask(taskHolder,taskData);
+        }
+    }
+
+    public class ExtendedTaskBuilder<EConsole,ETask> : TaskBuilder where EConsole : Console where ETask : NormalPlayerTask
+    {
+        public delegate void ExtendedTaskBuilderF(ETask task,Database.TaskData taskData);
+        public delegate void ExtendedConsoleBuilderF(EConsole task, Database.TaskData taskData);
+
+        private ExtendedTaskBuilderF? TBuilder;
+        private ExtendedConsoleBuilderF? CBuilder;
+
+        public ExtendedTaskBuilder(ExtendedConsoleBuilderF? cBuilder = null,ExtendedTaskBuilderF ? tBuilder = null)
+        {
+            CBuilder = cBuilder;
+            TBuilder = tBuilder;
+        }
+
+        protected override NormalPlayerTask SetUpPlayerTask(GameObject taskHolder, Database.TaskData taskData)
+        {
+            ETask task;
+            task = taskHolder.AddComponent<ETask>();
+
+            InitializePlayerTask(task, taskData);
+            if(TBuilder!=null)TBuilder.Invoke(task,taskData);
 
             return task;
+        }
+
+        protected override Console SetUpConsole(CustomConsole cc, Database.TaskData taskData,int step)
+        {
+            EConsole console;
+            console = cc.GameObject.AddComponent<EConsole>();
+
+            InitializeConsole(console, cc, taskData,step);
+            if (CBuilder != null) CBuilder.Invoke(console, taskData);
+            
+            return console;
+        }
+    }
+
+    public class UploadTaskBuilder : TaskBuilder
+    {
+        public override NormalPlayerTask BuildTask(ShipStatus shipStatus, GameObject taskHolder, Blueprint blueprint, Database.TaskData taskData)
+        {
+            var task = base.BuildTask(shipStatus, taskHolder, blueprint, taskData);
+            ScheduleSetStartAtRoomByConsoles(task,taskData.ConsoleList[0],shipStatus,blueprint,taskData);
+            return task;
+        }
+    }
+
+    public class DivertPowerTaskBuilder : ExtendedTaskBuilder<Console, DivertPowerTask>
+    {
+        public override NormalPlayerTask BuildTask(ShipStatus shipStatus, GameObject taskHolder, Blueprint blueprint, Database.TaskData taskData)
+        {
+            var result = base.BuildTask(shipStatus,taskHolder,blueprint,taskData);
+            
+            var opt = result.gameObject.AddComponent<Behaviours.NormalPlayerTaskOption>();
+            int id = Behaviours.CustomShipStatus.Instance.TaskInitializerList.Count;
+            Behaviours.CustomShipStatus.Instance.TaskInitializerList.Add((task) =>
+           {
+               task.gameObject.GetComponent<DivertPowerTask>().TargetSystem = GetStartAtRoomByConsoles(taskData.ConsoleList[1], blueprint);
+           });
+            opt.InitializerId=id;
+
+            return result;
         }
     }
 

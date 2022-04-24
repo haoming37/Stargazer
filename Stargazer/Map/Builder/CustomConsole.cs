@@ -10,7 +10,7 @@ namespace Stargazer.Map.Builder
         public string UniqueConsoleId { get; set; }
         public int TaskConsoleId { get; set; }
         public SystemTypes RoomId { get; set; }
-        public CustomConsole(string name,string uniqueId,Vector2 pos,SystemTypes roomId) : base(name,pos)
+        public CustomConsole(string name,string uniqueId,Vector2 pos,SystemTypes roomId) : base(name,pos,false)
         {
             RoomId = roomId;
             UniqueConsoleId = uniqueId;

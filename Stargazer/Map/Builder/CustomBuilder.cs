@@ -5,6 +5,43 @@ using UnityEngine;
 
 namespace Stargazer.Map.Builder
 {
+    public class AddressableSprite
+    {
+        public string? Address { get; private set; }
+        private Sprite? Sprite;
+        private bool isDirty;
+        public AddressableSprite()
+        {
+            Address = null;
+            Sprite = null;
+            isDirty = false;
+        }
+
+        public void SetAddress(string address)
+        {
+            Address = address;
+            isDirty = true;
+        }
+
+        public Sprite? GetSprite(Blueprint blueprint)
+        {
+            if (!isDirty) return Sprite;
+            
+            isDirty = false;
+
+            if (Address == null) { Sprite = null; return null; }
+            if (Address.StartsWith("/"))
+            {
+                Sprite = Assets.MapAssets.GetSprite(Address.Substring(1));
+            }
+            else
+            {
+                Sprite = Helpers.loadSpriteFromDisk(blueprint.GetAddressPrefix() + Address, 100f);
+            }
+            return Sprite;
+        }
+    }
+
     public class CustomBuilder
     {
         public string Name { get; set; }

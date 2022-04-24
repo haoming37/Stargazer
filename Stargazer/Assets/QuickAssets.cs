@@ -14,7 +14,14 @@ namespace Stargazer.Assets
             return MapAssets.GetAsset(0).transform.GetComponentInChildren<Vent>();
         }
 
-        public static Minigame? GetMinigamePrefab(TaskTypes taskTypes,int arg = 0)
+        public static Minigame? GetMinigamePrefab(TaskTypes taskTypes, int arg = 0)
+        {
+            var prefab = GetMinigameOriginalPrefab(taskTypes,arg);
+            if (prefab == null) return null;
+            return UnityEditor.PrefabUtility.SaveAsPrefabAsset(prefab.gameObject, "Stargazer/Task/" + prefab.name + ".prefab").GetComponent<Minigame>();
+        }
+
+        private static Minigame? GetMinigameOriginalPrefab(TaskTypes taskTypes,int arg = 0)
         {
             switch (taskTypes)
             {

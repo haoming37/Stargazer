@@ -30,11 +30,15 @@ namespace Stargazer.Database
         public List<List<string>> ConsoleList { get; set; }
 
         public TaskTypes TaskType { get; set; }
+        public int TaskTypeArgument { get; set; }
+
         public int MaxSteps { get; set; }
         public TaskCategory TaskCategory { get; set; }
 
         public bool ShowTaskTimer { get; set; }
         public bool ShowTaskSteps { get; set; }
+
+        public SystemTypes StartAt { get; set; }
 
         public TaskData()
         {
@@ -42,9 +46,12 @@ namespace Stargazer.Database
             TaskType = TaskTypes.FixWiring;
             MaxSteps = 1;
             TaskCategory = TaskCategory.CommonTask;
+            TaskTypeArgument = 0;
 
             ShowTaskTimer = false;
             ShowTaskSteps = true;
+
+            StartAt = SystemTypes.Hallway;
         }
     }
 }

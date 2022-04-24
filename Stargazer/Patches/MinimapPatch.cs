@@ -10,6 +10,8 @@ namespace Stargazer.Patches
     {
         public static void Postfix(MapBehaviour __instance)
         {
+            if (!__instance.countOverlay) return;
+
             var pool = __instance.countOverlay.gameObject.GetComponent<ObjectPoolBehavior>();
 
             foreach(var ca in __instance.countOverlay.CountAreas) {

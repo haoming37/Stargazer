@@ -9,14 +9,16 @@ namespace Stargazer.Map.Builder
     {
         public bool IsFront { get; set; }
 
-        public SpriteRenderer Renderer { get; private set; }
-        protected Sprite Sprite { get; set; }
-        public string? SpriteAddress { get; set; }
+        public bool IsBack { get; set; }
 
-        public CustomObject(string name,Vector2 pos,bool isFront = false):base(name,pos)
+        public SpriteRenderer Renderer { get; private set; }
+        public AddressableSprite Sprite { get; set; }
+
+        public CustomObject(string name,Vector2 pos,bool isFront = false,bool isBack=true):base(name,pos)
         {
             IsFront = isFront;
-            SpriteAddress = null;
+            IsBack = isBack;
+            Sprite = new AddressableSprite();
         }
 
         public override void PreBuild(Blueprint blueprint, ShipStatus shipStatus, Transform parent)
@@ -24,14 +26,18 @@ namespace Stargazer.Map.Builder
             GameObject = new GameObject(Name);
             GameObject.transform.SetParent(parent);
             GameObject.transform.localPosition = new Vector3(Position.x, Position.y, IsFront ? -2f : 4f);
-            GameObject.SetActive(true);
+            if (!(IsBack || IsFront))
+            {
+                var pos = GameObject.transform.position;
+                GameObject.transform.position = new Vector3(pos.x, pos.y, pos.y / 1000f);
+            }
+             GameObject.SetActive(true);
             GameObject.layer = LayerMask.NameToLayer("Ship");
 
-            if (SpriteAddress != null)
+            if (Sprite.GetSprite(blueprint) != null)
             {
-                if (!Sprite) Sprite = Helpers.loadSpriteFromDisk(blueprint.GetAddressPrefix() + SpriteAddress, 100f);
                 Renderer = GameObject.AddComponent<SpriteRenderer>();
-                Renderer.sprite = Sprite;
+                Renderer.sprite = Sprite.GetSprite(blueprint);
                 Renderer.material = blueprint.MaskingShader;
             }
         }

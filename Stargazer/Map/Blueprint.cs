@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 using UnityEngine;
 using Stargazer.Map.Configurations;
 
@@ -49,11 +50,29 @@ namespace Stargazer.Map
             TaskDatabase = new HashSet<Database.TaskData>();
         }
 
+        private void CleanMiniMap(MapBehaviour mapBehaviour)
+        {
+            //カウンタを削除
+            foreach(var area in mapBehaviour.countOverlay.CountAreas)
+                UnityEngine.Object.Destroy(area.gameObject);
+            mapBehaviour.countOverlay.CountAreas = new UnhollowerBaseLib.Il2CppReferenceArray<CounterArea>(0);
+
+            foreach(var text in mapBehaviour.transform.FindChild("RoomNames").GetComponentsInChildren<TMPro.TextMeshPro>())
+                UnityEngine.Object.Destroy(text.gameObject);
+        }
+
         public override void PreBuild(Blueprint blueprint, ShipStatus shipStatus, Transform parent)
         {
             //初期化
             Consoles.Clear();
             Vents.Clear();
+
+            shipStatus.MapPrefab = UnityEditor.PrefabUtility.SaveAsPrefabAsset(shipStatus.MapPrefab.gameObject, "Stargazer/Minimap.prefab").GetComponent<MapBehaviour>();
+
+            if (blueprint.RequirePlainMap) CleanMiniMap(shipStatus.MapPrefab);
+
+            //コンポーネントの設定
+            Behaviours.CustomShipStatus.Instance = shipStatus.gameObject.AddComponent<Behaviours.CustomShipStatus>();
 
             MaskingShader = new Material(GetMaterial("MaskingShader"));
             HighlightMaterial = GetMaterial("HighlightMat");

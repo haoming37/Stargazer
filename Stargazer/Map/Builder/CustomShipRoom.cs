@@ -34,8 +34,7 @@ namespace Stargazer.Map.Builder
 
         public RoomOverrayBuilder? RoomOverray { get; set; }
 
-        public string? SpriteAddress { get; set; }
-        protected Sprite Sprite { get; set; }
+        public AddressableSprite Sprite { get; set; }
 
         public CustomShipRoom(string name,SystemTypes room,StringNames stringNames, Vector2 pos) : base(name,pos)
         {
@@ -43,7 +42,7 @@ namespace Stargazer.Map.Builder
             RoomStrings=stringNames;
             Edges = new Vector2[] { };
             RoomRenderer = null;
-            SpriteAddress = null;
+            Sprite = new AddressableSprite();
 
             //ミニマップ関連
             RoomOverray = null;
@@ -94,15 +93,14 @@ namespace Stargazer.Map.Builder
                 text.TargetText = RoomStrings;
             }
 
-            if (SpriteAddress != null)
+            if (Sprite.GetSprite(blueprint) != null)
             {
-                if (!Sprite) Sprite = Helpers.loadSpriteFromDisk(blueprint.GetAddressPrefix()+SpriteAddress, 100f);
                 var obj = new GameObject("RoomRenderer");
                 obj.transform.SetParent(GameObject.transform);
                 obj.transform.localPosition = new Vector3(0, 0, 5f);
                 obj.layer = LayerMask.NameToLayer("Ship");
                 RoomRenderer = obj.AddComponent<SpriteRenderer>();
-                RoomRenderer.sprite = Sprite;
+                RoomRenderer.sprite = Sprite.GetSprite(blueprint);
                 RoomRenderer.material = blueprint.MaskingShader;
             }
         }
